@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>URL Shortener</title>
+
+</head>
+<style>
+  body{
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+  }
+  .container {
+     max-width: 600px;
+     margin: 0 auto;
+     background: #fff;
+     padding: 20px;
+     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    
+  }
+  h1 {
+    text-align: center;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  input[type="url"] {
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom:10px;
+    border: 1px solid #ddd;
+
+  }
+  button {
+    padding: 10px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    font-size: 16px;
+  }
+  .result {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #e1f3e1;
+    border: 1px solid #5cb85c;
+  }
+  
+</style>
+<body>
+    <div class="container">
+        <h1>URL Shortener</h1>
+        <form id="urlForm" method="post" action="/">
+           
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <input type="url"  id="url" name="url" placeholder="Enter a URL to shorten" required>
+            <button type="submit" id="submit">Shorten</button>
+        </form>
+
+        <div class="result" id="result" style="display:none;">
+           Shortened URL: <a id="shortenedURL" href=""></a>
+        <div>
+
+        
+          <div id="error" style="display:none";>
+              <p id="errorMessage"></p>
+          </div>
+        
+    </div>
+   
+   
+    <script>  
+      //  document.addEventListener('DOMContentLoaded', (event) => {
+        document.addEventListener('DOMContentLoaded', function() {
+          const urlForm = document.getElementById('urlForm');
+          urlForm.addEventListener('submit', function(event) {
+          //document.getElementById('urlForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            console.log('Form submission intercepted');
+            const urlInput = document.getElementById('url');
+            const url = urlInput.value;
+            console.log(url);
+           
+            //fetch sends AJAX request to the server.
+            //It then processess the JSON response to update the result section
+            //without reloading the entire page
+            fetch('/shorten/', {
+                method: 'POST',
+                headers: {
+                    'content-type':  'application/x-www-form-urlencoded',
+                    'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value
+                },
+                body: 'url=' + encodeURIComponent(url)
+            })
+            .then(response => {
+              if (!response.ok) {
+                return response.json().then(error => {
+                  throw new Error(error.errorMessage || ' Network response was not ok')
+                });
+              }
+              return response.json();
+            })
+            .then(data => {
+              
+                const resultDiv = document.getElementById('result');
+                const shortenedURL = document.getElementById('shortenedURL');
+                shortenedURL.href = data.shortened_url;
+                shortenedURL.textContent = data.shortened_url;
+                resultDiv.style.display = 'block';
+            })
+            .catch(error => {
+                    console.error('Error:', error);
+                    const errorDiv = document.getElementById('error');
+                    const errorMessage = document.getElementById('errorMessage');
+                    errorMessage.textContent = 'Error: ' + error.message;
+                    errorDiv.style.display = 'block';
+
+                    // Hide result if previously shown
+                    document.getElementById('result').style.display = 'none';
+            });
+            
+        });
+       });
+      
+    </script>
+</body>
+</html>

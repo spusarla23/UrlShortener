@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+*__pycache__/
+
+# Django
+db.sqlite3
+*.log
+media/
+
+# virtual environment
+venv/
+env/
+
+# Node.js dependencies
+node_modules/
+
+# Build output directories
+build/
+dist/
+
+# Environment variables
+.env
+
+# Static files
+/static/
+
+# Editor directories
+.vscode/
+
+
